@@ -42,14 +42,15 @@ else
     sed --in-place "s#-x-replace-oc-rootpath-#/var/www/#" /etc/nginx/nginx.conf
 fi
 
-cat << EOF | xargs chown --recursive www-data:www-data
-/var/www/owncloud/data
-/var/www/owncloud/assets
-/var/www/owncloud/apps
-/var/www/owncloud/apps_persistent
-/var/www/owncloud/config/config.php
-/owncloud
-EOF
+# Do not update permissions
+#cat << EOF | xargs chown --recursive www-data:www-data
+#/var/www/owncloud/data
+#/var/www/owncloud/assets
+#/var/www/owncloud/apps
+#/var/www/owncloud/apps_persistent
+#/var/www/owncloud/config/config.php
+#/owncloud
+#EOF
 
 if ! occ  2>/dev/null | grep --quiet 'ownCloud is not installed'
 then
@@ -58,6 +59,16 @@ then
 fi
 
 oc-install-3party-apps /owncloud/3party_apps.conf /var/www/owncloud/apps_persistent
+
+if [ -n "$OWNCLOUD_UUID" ]
+then
+	usermod -u 1001 www-data
+fi
+if [ -n "$OWNCLOUD_GUID" ]
+then
+        groupmod -g 1001 www-data
+fi
+
 
 echo "Starting server …"
 
